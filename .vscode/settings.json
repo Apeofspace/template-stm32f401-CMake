@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "usb_device.h": "c",
+        "params.h": "c",
+        "math.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "main.h": "c",
+        "stdbool.h": "c"
+    },
+}

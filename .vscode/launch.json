@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "cwd": "${workspaceFolder}",
+        "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
+        "name": "Debug with ST-Link",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "showDevDebugOutput": "none",
+        "servertype": "stlink",
+        "preLaunchTask": "flash-stlink",
+        "svdFile": "${workspaceRoot}/svd/STM32F401.svd"
+      },
+
+      {
+        "name": "Cortex Debug",
+        "cwd": "${workspaceRoot}",
+        "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "servertype": "openocd",
+        "device": "STM32F401",
+        "configFiles": [
+          "interface/stlink.cfg",
+          "target/stm32f4x.cfg"
+        ],
+        "preLaunchTask": "flash-stlink",
+        "showDevDebugOutput": "raw",
+        "svdFile": "${workspaceRoot}/svd/STM32F401.svd"
+      },
+      {
+        "name": "Cortex attach",
+        "cwd": "${workspaceRoot}",
+        "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
+        "request": "attach",
+        "type": "cortex-debug",
+        "servertype": "openocd",
+        "device": "STM32F401",
+        "configFiles": [
+          "interface/stlink.cfg",
+          "target/stm32f4x.cfg"
+        ],
+        "preLaunchTask": "",
+        "showDevDebugOutput": "raw",
+        "svdFile": "${workspaceRoot}/svd/STM32F401.svd"
+      }
+    ]
+  }
