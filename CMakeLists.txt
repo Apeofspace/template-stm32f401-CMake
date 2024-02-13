@@ -4,7 +4,11 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
 endif()
 
 #-----PROJECT NAME-----
-project(template)
+# this hack puts dir name as project name
+# for serious project its better to set up actual name (also do it in Makefile)
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR FILENAME ProjectName)   
+string(REPLACE " " "_" ProjectId ${ProjectName})
+project(${ProjectName})
 
 #-----MCU-----
 set(MCPU cortex-m4)
@@ -57,7 +61,6 @@ set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld)
 set(STARTUP_SCRIPT ${CMAKE_SOURCE_DIR}/startup_stm32f401xc.s)
 
 #-----COMPILE OPTIONS-----
-# add_compile_definitions(${MCU_MODEL} use_hal_driver)
 add_definitions(-DUSE_HAL_DRIVER -${MCU_MODEL})
 
 add_compile_options(
