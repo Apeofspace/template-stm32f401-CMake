@@ -9,9 +9,9 @@ ${BUILD_DIR}/Makefile:
 	cmake \
 		-B${BUILD_DIR} \
 		-DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-		-DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		-DDUMP_ASM=OFF
+		# -DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake \
+		# -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		# -DDUMP_ASM=OFF
 
 cmake: ${BUILD_DIR}/Makefile
 

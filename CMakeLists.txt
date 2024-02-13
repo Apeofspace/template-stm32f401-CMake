@@ -35,9 +35,10 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 file(GLOB_RECURSE C_SRC CONFIGURE_DEPENDS "Core/Src/*.c" )
 
 file(GLOB_RECURSE C_LIBS CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c)
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/*.c)
-    # ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/*.c)
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/*.c
     )
 
 include_directories(
@@ -45,7 +46,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc/Legacy
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
     ${CMAKE_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc 
     ${CMAKE_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc 
     ${CMAKE_SOURCE_DIR}/USB_DEVICE/App 
@@ -56,7 +57,8 @@ set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld)
 set(STARTUP_SCRIPT ${CMAKE_SOURCE_DIR}/startup_stm32f401xc.s)
 
 #-----COMPILE OPTIONS-----
-add_compile_definitions(${mcu_model} use_hal_driver)
+# add_compile_definitions(${MCU_MODEL} use_hal_driver)
+add_definitions(-DUSE_HAL_DRIVER -${MCU_MODEL})
 
 add_compile_options(
     -mcpu=${MCPU}
@@ -75,8 +77,8 @@ add_link_options(
     -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
     --specs=nosys.specs 
     -Wl,--start-group
-    -lc
-    -lm
+    # -lc
+    # -lm
     -lstdc++
     -Wl,--end-group
     -Wl,-gc-sections,--print-memory-usage
