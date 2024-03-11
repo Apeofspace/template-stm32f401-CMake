@@ -57,6 +57,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/USB_DEVICE/Target 
     )
 
+# freertos
+include_directories(
+    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 
+    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
+    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/
+    )
+
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld)
 set(STARTUP_SCRIPT ${CMAKE_SOURCE_DIR}/startup_stm32f401xc.s)
 
