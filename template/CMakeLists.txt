@@ -57,7 +57,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/USB_DEVICE/Target 
     )
 
-# freertos
+# freertos (disable if not needed)
 include_directories(
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
@@ -86,11 +86,6 @@ add_link_options(
     -mthumb
     -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
     --specs=nosys.specs 
-    -Wl,--start-group
-    # -lc
-    # -lm
-    -lstdc++
-    -Wl,--end-group
     -Wl,-gc-sections,--print-memory-usage
 )
 
@@ -113,11 +108,13 @@ add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 
 #-----BUILD TYPE-----
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    message(STATUS "Maximum optimization for speed")
-    add_compile_options(-Ofast)
+    message(STATUS "High optimization for speed")
+    add_compile_options(-O3)
+    # add_compile_options(-Ofast)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    message(STATUS "Maximum optimization for speed, debug info included")
-    add_compile_options(-Ofast -g)
+    message(STATUS "High optimization for speed, debug info included")
+    add_compile_options(-O3 -g)
+    # add_compile_options(-Ofast -g)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
     message(STATUS "Maximum optimization for size")
     add_compile_options(-Os)
@@ -127,12 +124,17 @@ else ()
 endif ()
 
 #-----BUILD COMMANDS-----
-add_executable(${PROJECT_NAME}.elf ${C_SRC} ${C_LIBS} ${STARTUP_SCRIPT} ${LINKER_SCRIPT})
-set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
-set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
+set(OUTPUT_NAME output)
+# set(OUTPUT_NAME ${PROJECT_NAME})
+add_executable(${OUTPUT_NAME}.elf ${C_SRC} ${C_LIBS} ${STARTUP_SCRIPT} ${LINKER_SCRIPT})
+set(HEX_FILE ${PROJECT_BINARY_DIR}/${OUTPUT_NAME}.hex)
+set(BIN_FILE ${PROJECT_BINARY_DIR}/${OUTPUT_NAME}.bin)
 
-add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+target_link_libraries(${OUTPUT_NAME}.elf m) # link math.h 
+# target_link_libraries(${OUTPUT_NAME}.elf stdc++) # link c++ stdl
+
+add_custom_command(TARGET ${OUTPUT_NAME}.elf POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${OUTPUT_NAME}.elf> ${HEX_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${OUTPUT_NAME}.elf> ${BIN_FILE}
     COMMENT "Building ${HEX_FILE}
     Building ${BIN_FILE}")

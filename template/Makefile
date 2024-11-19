@@ -1,4 +1,4 @@
-.PHONY: all build cmake clean format
+.PHONY: all build cmake clean flash
 
 BUILD_DIR := build
 BUILD_TYPE ?= Debug
