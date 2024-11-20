@@ -5,14 +5,12 @@ endif()
 
 #-----PROJECT NAME-----
 # this hack puts dir name as project name
-# for serious project its better to set up actual name (also do it in Makefile)
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR FILENAME ProjectName)   
 string(REPLACE " " "_" ProjectId ${ProjectName})
 project(${ProjectName})
 
 #-----MCU-----
 set(MCPU cortex-m4)
-set(MCU_FAMILY STM32F4xx)
 set(MCU_MODEL DSTM32F401xC)
 
 #----COMPILER SETTINGS----
@@ -35,34 +33,27 @@ set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-#----SOURCES----
+#----SOURCES, HEADERS, SCRIPTS----
 file(GLOB_RECURSE C_SRC CONFIGURE_DEPENDS "Core/Src/*.c" )
 
 file(GLOB_RECURSE C_LIBS CONFIGURE_DEPENDS
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/*.c
     )
 
-include_directories(
-    ${CMAKE_SOURCE_DIR}/Core/Inc 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc/Legacy
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
-    ${CMAKE_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc 
-    ${CMAKE_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc 
-    ${CMAKE_SOURCE_DIR}/USB_DEVICE/App 
-    ${CMAKE_SOURCE_DIR}/USB_DEVICE/Target 
-    )
+MACRO(HEADER_DIRECTORIES return_list)
+    FILE(GLOB_RECURSE new_list CONFIGURE_DEPENDS *.h )
+    SET(dir_list "")
+    FOREACH(file_path ${new_list})
+        GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
+        SET(dir_list ${dir_list} ${dir_path})
+    ENDFOREACH()
+    LIST(REMOVE_DUPLICATES dir_list)
+    SET(${return_list} ${dir_list})
+ENDMACRO()
 
-# freertos (disable if not needed)
-include_directories(
-    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 
-    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
-    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/
-    )
+HEADER_DIRECTORIES(INCLUDE_DIRS)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld)
 set(STARTUP_SCRIPT ${CMAKE_SOURCE_DIR}/startup_stm32f401xc.s)
@@ -81,12 +72,14 @@ add_compile_options(
 )
 
 add_link_options(
-    -T ${LINKER_SCRIPT}
     -mcpu=${MCPU}
     -mthumb
-    -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
-    --specs=nosys.specs 
-    -Wl,-gc-sections,--print-memory-usage
+    -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map,--cref
+    -T ${LINKER_SCRIPT}
+    -lm -lnosys 
+    --specs=nano.specs 
+    -Wl,-gc-sections,--print-memory-usage 
+    # -gc-sections requires -ffunction-sections and -fdata-sections
 )
 
 # Uncomment for hardware floating point
@@ -130,6 +123,7 @@ add_executable(${OUTPUT_NAME}.elf ${C_SRC} ${C_LIBS} ${STARTUP_SCRIPT} ${LINKER_
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${OUTPUT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${OUTPUT_NAME}.bin)
 
+target_include_directories(${OUTPUT_NAME}.elf PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(${OUTPUT_NAME}.elf m) # link math.h 
 # target_link_libraries(${OUTPUT_NAME}.elf stdc++) # link c++ stdl
 
