@@ -76,8 +76,10 @@ add_link_options(
     -mthumb
     -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map,--cref
     -T ${LINKER_SCRIPT}
+    # -lm 
+    # --specs=nano.specs 
     -lm -lnosys 
-    --specs=nano.specs 
+    --specs=nosys.specs 
     -Wl,-gc-sections,--print-memory-usage 
     # -gc-sections requires -ffunction-sections and -fdata-sections
 )
