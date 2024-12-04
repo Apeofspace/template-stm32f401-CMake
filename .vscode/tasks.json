@@ -3,12 +3,9 @@
   "tasks": [
     {
       "type": "shell",
-      "label": "Build transiever firmware",
+      "label": "Build",
       "command": "make",
-      "args": [
-        "all",
-        "-j4"
-      ],
+      "args": ["all", "-j8"],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -16,32 +13,25 @@
     },
     {
       "type": "shell",
-      "label": "flash-stlink",
-      "command": "st-flash",
-      "args": [
-        "--reset",
-        "write",
-        "${workspaceFolder}/build/${workspaceFolderBasename}.bin",
-        "0x08000000"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}/build"
-      },
-      "dependsOn": "build transiever firmware",
+      "label": "Flash",
+      "command": "make",
+      "args": ["flash"],
       "problemMatcher": [],
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
       }
     },
     {
-        "label": "Build firmware CMake",
-        "type": "shell",
-        "command": "cmake --build ./build -j4",
-        "group": {
-            "kind": "build",
-            "isDefault": true
-        }
-    },
+      "type": "shell",
+      "label": "Clean",
+      "command": "make",
+      "args": ["clean"],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    }
   ]
 }
+

@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.7...3.28)
-if(${CMAKE_VERSION} VERSION_LESS 3.12)
-  cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-endif()
+cmake_minimum_required(VERSION 3.21)
 
 # -----PROJECT NAME-----
 # this hack puts dir name as project name
@@ -12,6 +9,7 @@ set(OUTPUT_NAME ${OUTPUT_BIN_NAME})
 
 # -----MCU-----
 set(MCPU cortex-m4)
+set(MCU_FAMILY STM32F4xx)
 set(MCU_MODEL STM32F401xC)
 set(MFPU fpv4-sp-d16)
 
@@ -36,25 +34,28 @@ set(SIZE arm-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # ----SOURCES, HEADERS, SCRIPTS----
-file(GLOB_RECURSE C_SRC CONFIGURE_DEPENDS "Core/Src/*.c")
+file(GLOB_RECURSE C_SRC CONFIGURE_DEPENDS Core/Src/*.c)
 
-file(
-  GLOB_RECURSE C_LIBS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/*.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/*.c)
+file(GLOB_RECURSE C_LIBS CONFIGURE_DEPENDS Drivers/*.c Middlewares/*.c
+     USB_DEVICE/*.c)
 
-macro(HEADER_DIRECTORIES return_list)
-  file(GLOB_RECURSE new_list CONFIGURE_DEPENDS *.h)
-  set(dir_list "")
-  foreach(file_path ${new_list})
-    get_filename_component(dir_path ${file_path} PATH)
-    set(dir_list ${dir_list} ${dir_path})
-  endforeach()
-  list(REMOVE_DUPLICATES dir_list)
-  set(${return_list} ${dir_list})
-endmacro()
+# macro(HEADER_DIRECTORIES return_list) file(GLOB_RECURSE new_list
+# CONFIGURE_DEPENDS *.h) set(dir_list "") foreach(file_path ${new_list})
+# get_filename_component(dir_path ${file_path} PATH) set(dir_list ${dir_list}
+# ${dir_path}) endforeach() list(REMOVE_DUPLICATES dir_list) set(${return_list}
+# ${dir_list}) endmacro() header_directories(INCLUDE_DIRS)
 
-header_directories(INCLUDE_DIRS)
+set(INCLUDE_DIRS Core/Inc)
+
+set(INCLUDE_DIRS_LIBS
+    Drivers/${MCU_FAMILY}_HAL_Driver/Inc
+    Drivers/${MCU_FAMILY}_HAL_Driver/Inc/Legacy
+    Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
+    Drivers/CMSIS/Include
+    Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+    Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
+    USB_DEVICE/App
+    USB_DEVICE/Target)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F401CCUx_FLASH.ld)
 set(STARTUP_SCRIPT ${CMAKE_SOURCE_DIR}/startup_stm32f401xc.s)
@@ -100,7 +101,8 @@ target_compile_definitions(${TARGET_NAME} PRIVATE ${COMP_DEFS})
 target_compile_options(${TARGET_NAME} PRIVATE ${COMP_OPTS})
 target_link_options(${TARGET_NAME} PRIVATE ${LINK_OPTS})
 target_link_libraries(${TARGET_NAME} m)
-target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIRS})
+target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIRS}
+                                                  ${INCLUDE_DIRS_LIBS})
 
 # -----BUILD TYPE-----
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
@@ -127,4 +129,3 @@ add_custom_command(
   COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_NAME}> ${BIN_FILE}
   COMMENT "Building ${HEX_FILE}
     Building ${BIN_FILE}")
-
